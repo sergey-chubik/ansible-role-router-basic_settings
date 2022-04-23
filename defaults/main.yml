@@ -1,0 +1,11 @@
+---
+
+domain: ekaterinburg.fsin.uis
+dns_srv1: 10.66.198.150
+dns_srv2: 10.66.8.40
+ntp_srv1: 10.66.254.254
+ntp_srv2: 10.66.254.250
+radius_srv: 10.66.198.159
+radius_passd: prime66
+snmp_srv: 10.66.198.156
+snmp_comm: gufsin66

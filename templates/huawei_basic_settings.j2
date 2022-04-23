@@ -1,0 +1,36 @@
+clock timezone YEKT add 05:00:00
+system-view
+sysname {{ hostname }}
+dns server {{ dns_srv1 }}
+dns server {{ dns_srv2 }}
+dns domain {{ domain }}
+ntp-service unicast-server {{ ntp_srv1 }} preference
+ntp-service unicast-server {{ ntp_srv2 }}
+snmp-agent
+snmp-agent sys-info version v2c
+snmp-agent community read {{ snmp_comm }}
+radius-server template RADSERV
+  radius-server authentication {{ radius_srv }} 1812 source ip-address {{ mgmnt_ip }}
+  radius-server accounting {{ radius_srv }} 1813 source ip-address {{ mgmnt_ip }}
+  radius-server shared-key cipher {{ radius_passd }}
+  radius-attribute nas-ip {{ mgmnt_ip }}
+  quit
+aaa
+ authentication-scheme default
+  authentication-mode radius local
+ authentication-scheme radius
+  authentication-mode radius
+ domain default_admin
+  authentication-scheme default
+  authorization-scheme default
+  radius-server RADSERV
+  quit
+ quit
+user-interface vty 0 4
+ authentication-mode aaa
+ user privilege level 15
+ history-command max-size 256
+ idle-timeout 30 0
+ protocol inbound ssh
+ quit
+quit

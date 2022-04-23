@@ -1,0 +1,33 @@
+---
+
+- name: RUN on JUNOS SETTINGS HOSTMAME, LOGIN-OPTIONS, DNS, NTP, RADIUS, SNMP SERVERS
+  cli_config:
+    config: |
+      set system host-name {{ hostname }} max-configurations-on-flash 30 max-configuration-rollbacks 30 time-zone Asia/Tashkent
+      set system login retry-options tries-before-disconnect 3 backoff-threshold 1 backoff-factor 10 minimum-time 30
+      set system domain-name {{ domain }}
+      set system name-server {{ dns_srv1 }}
+      set system name-server {{ dns_srv2 }}
+      set system ntp server {{ ntp_srv1 }} prefer
+      set system ntp server {{ ntp_srv2 }}
+      set system radius-server {{ radius_srv }} port 1812 accounting-port 1813 secret {{ radius_passd }} source-address {{ mgmnt_ip }}
+      set system authentication-order radius authentication-order password
+      set system login user remote class super-user
+      set snmp community {{ snmp_comm }} authorization read-only clients {{ snmp_srv }}/32
+  when: ansible_network_os == 'junos'
+
+
+- name: RUN on CISCO SETTINGS HOSTMAME, LOGIN-OPTIONS, DNS, NTP, RADIUS, SNMP SERVERS
+  ios_config:
+    src: templates/cisco_basic_settings.j2
+  notify: save config ios
+  when: ansible_network_os == 'ios'
+
+
+- name: RUN CONFIGURE BASIC SETTINGS HUAWEI ROUTERS
+  block:
+    - name: RUN on HUAWEI SETTINGS HOSTMAME, LOGIN-OPTIONS, DNS, NTP, RADIUS, SNMP SERVERS
+      cli_command:
+        command: "{{ lookup('template', 'templates/huawei_basic_settings.j2') }}"
+    - include: save_config_huawei.yml
+  when: ansible_network_os == 'ce'

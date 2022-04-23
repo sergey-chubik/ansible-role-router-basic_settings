@@ -1,0 +1,36 @@
+hostname {{ hostname }}
+clock timezone YEKT 5
+ip name-server {{ dns_srv1 }}
+ip name-server {{ dns_srv2 }}
+ip domain name {{ domain }}
+ntp server {{ ntp_srv1 }} prefer
+ntp server {{ ntp_srv2 }}
+snmp-server community {{ snmp_comm }} RO
+snmp-server host {{ snmp_srv }} version 2c {{ snmp_comm }}
+{% if mgmnt_ip == '10.66.254.252' %}
+radius server RADSERV
+ address ipv4 {{ radius_srv }} auth-port 1812 acct-port 1813
+ key {{ radius_passd }}
+aaa group server radius RADGRP
+ server name RADSERV
+ ip radius source-interface {{ mgmnt_int }}
+ attribute nas-port format a
+ deadtime 3
+aaa authentication login default group RADGRP local
+aaa authorization exec default group RADGRP local
+{% else %}
+radius-server host {{ radius_srv }} auth-port 1812 acct-port 1813
+radius-server deadtime 3
+radius-server key {{ radius_passd }}
+radius-server attribute 32 include-in-access-req
+radius-server attribute 6 on-for-login-auth
+ip radius source-interface {{ mgmnt_int }}
+aaa authentication login default group radius local
+aaa authorization exec default group radius local
+{% endif %}
+line vty 0 15
+ exec-timeout 30 0
+ privilege level 15
+ logging synchronous
+ terminal-type mon
+ transport input ssh
